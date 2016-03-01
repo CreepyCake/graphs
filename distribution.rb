@@ -18,9 +18,9 @@ module Zipf
   class Distribution
     include Zipf::Plotter
 
-  B = 1.15 #1.2 for IOG, 1.15 for AK and O
-  P = 10 ** 5 #10**5 for IOG, 10**5 for AK and O
-  Ro = 0 #0 for IOG, 0 for AK and O
+  B = 1.15 #1.15 for IOG, AK and O
+  P = 10 ** 5.2 #10**5.2 for IOG, 10**5.21 for AK, 10**5.15 for O
+  Ro = 25 #25 for IOG, 15 for AK, 20 for O
 
   def initialize(filename)
     @filename = filename
@@ -62,8 +62,13 @@ module Zipf
   def zipf_const()
     @zipf ||= begin
       zipf = {}
+      tmp = []
       frequency.each do |k, v|
-        zipf[k] = Math::log(v * ranks[k])
+        tmp << v * ranks[k]
+      end
+      const = tmp.inject{ |sum, el| sum + el }.to_f / tmp.size
+      frequency.each do |k, v|
+        zipf[k] = Math::log(const / ranks[k].to_f)
       end
       zipf
     end
@@ -88,7 +93,7 @@ test = Zipf::Distribution.new(ARGV[0])
 #p test.frequency
 #p test.ranks
 #p test.zipf_const.values
-test.plot_ranks_frequency('test.png')
+test.plot_ranks_frequency('IOG.png')
 
 finish = Time.now
 puts finish - start
